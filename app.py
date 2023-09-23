@@ -23,6 +23,93 @@ table = 'employee'
 def home():
     return render_template('index.html')
 
+@app.route("/company")
+def company():
+    return render_template('company.html')
+
+@app.route("/adminCompanyApproval")
+def adminCompanyApproval():
+    return render_template('adminCompanyApproval.html')
+
+@app.route("/loginCompany", methods=['POST'])
+def loginCompany():
+    # Get user input email and password from HTML form
+    email = request.form['email']
+    password = request.form['password']
+
+    # Console log for debugging
+    print(email)
+    print(password)
+
+    # Check if email exists in company table in database
+    cursor = db_conn.cursor()
+    
+    fetch_sql = 'SELECT * FROM company WHERE email = %s'
+    cursor.execute(fetch_sql, (email,))
+    account = cursor.fetchone()
+
+    # Console log for debugging
+    print(account)
+    print(account[-1])
+    db_password = account[3]
+    db_status = account[-1]
+    db_isReviewed = account[-2]
+        
+    if(db_password != password):
+        return redirect(url_for('companyLogin', msg="Incorrect login details"))
+    elif(db_isReviewed == 0):
+        return redirect(url_for('companyLogin', msg="The admin has yet to review your registration"))
+    elif(db_status == "REJECTED"):
+        return redirect(url_for('companyLogin', msg="The admin has rejected your registration"))
+    else:
+        return redirect(url_for('company.html', id=account.id))
+
+
+@app.route("/registerCompany", methods=['POST'])
+def registerCompany():
+    # Get user input email and password from HTML form
+    name = request.form['name']
+    email = request.form['email']
+    password = request.form['password']
+    phone = request.form['phone']
+    address = request.form['address']
+    state = request.form['state']
+    postcode = request.form['postcode']
+    city = request.form['city']
+    city = request.form['state']
+
+    # Console log for debugging
+    print(email)
+    print(name)
+    
+    insert_sql = "INSERT INTO company \
+        (name, email, password, phone, address, postcode, city, state) \
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+    cursor = db_conn.cursor()
+    try:
+        cursor.execute(insert_sql, (name, email, password, phone, address, postcode, city, state))
+        db_conn.commit()
+        print("company registration successful")
+    except Exception as e:
+        print("company registration failed")
+        print(e)
+    finally:
+        cursor.close()
+    
+    return redirect(url_for('companyLogin'))
+
+@app.route("/companyRegister")
+def companyRegister():
+    return render_template('companyRegister.html')
+
+@app.route("/companyLogin", methods=['GET'])
+def companyLogin():
+    msg = ""
+    try:
+        print("message:" + request.args['msg'])
+        msg = request.args['msg']
+    finally:
+        return render_template('companyLogin.html')
 
 @app.route("/about", methods=['POST'])
 def about():
@@ -146,3 +233,5 @@ def ykPortfolio():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
+
+
