@@ -23,10 +23,8 @@ table = 'employee'
 def home():
     return render_template('index.html')
 
-@app.route("/company", methods=['GET'])
-def company():
-    id = request.args['id']
-    
+@app.route("/company/<id>")
+def company(id):
     # Get all company details from database
     cursor = db_conn.cursor()
     fetch_sql = 'SELECT * FROM company WHERE id = %s'
