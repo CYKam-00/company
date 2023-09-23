@@ -23,9 +23,23 @@ table = 'employee'
 def home():
     return render_template('index.html')
 
-@app.route("/company")
+@app.route("/company", methods=['GET'])
 def company():
-    return render_template('company.html')
+    id = request.args['id']
+    
+    # Get all company details from database
+    cursor = db_conn.cursor()
+    fetch_sql = 'SELECT * FROM company WHERE id = %s'
+    cursor.execute(fetch_sql, (id,))
+    company = cursor.fetchone()
+    cursor.close()
+    
+    if(company[-1] == None):
+        company += ("Reviewing",)
+    
+    print(company)
+
+    return render_template('company.html', company=company)
 
 @app.route("/adminCompanyApproval")
 def adminCompanyApproval():
@@ -52,17 +66,17 @@ def loginCompany():
     print(account)
     print(account[-1])
     db_password = account[3]
-    db_status = account[-1]
-    db_isReviewed = account[-2]
+    db_id = None
+    if account[0] == None:
+        db_id = -1
+    else:
+        db_id = account[0]
         
+    print(db_id)
     if(db_password != password):
         return redirect(url_for('companyLogin', msg="Incorrect login details"))
-    elif(db_isReviewed == 0):
-        return redirect(url_for('companyLogin', msg="The admin has yet to review your registration"))
-    elif(db_status == "REJECTED"):
-        return redirect(url_for('companyLogin', msg="The admin has rejected your registration"))
     else:
-        return redirect(url_for('company.html', id=account.id))
+        return redirect(url_for('company', id=db_id))
 
 
 @app.route("/registerCompany", methods=['POST'])
@@ -109,7 +123,7 @@ def companyLogin():
         print("message:" + request.args['msg'])
         msg = request.args['msg']
     finally:
-        return render_template('companyLogin.html')
+        return render_template('companyLogin.html', msg=msg)
 
 @app.route("/about", methods=['POST'])
 def about():

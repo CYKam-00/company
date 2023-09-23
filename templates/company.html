@@ -104,16 +104,24 @@
     </nav>
     <!-- Navbar End -->
 
-    <!-- Register Start -->
+    <!-- display company details Start -->
     <div>
-        <form action="/registerCompany" autocomplete="on" method = "POST" enctype="multipart/form-data">
-            <input type="text" name="email" placeholder="Email">
-            <input type="text" name="state" placeholder="state">
-            <input type="submit" value="Register">
-        </form>
-    </div>
+      <p>Name: {{ company[1] }}</p>
+      <p>Email: {{ company[2] }} </p>
+      <p>phone: {{ company[4]}} </p>
+      <p>address: {{ company[5]}} </p>
+      <p>postcode: {{ company[6]}} </p>
+      <p>city: {{ company[7]}} </p>
+      <p>state: {{ company[8]}} </p>
+      <p>review status: {{ company[-1]}} </p>
 
-    <!-- Register End -->
+      <div style="width:200px">
+        <a href="../companyLogin" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block"
+          >Logout<i class="fa fa-arrow-right ms-3"></i
+        ></a>
+      </div>
+    </div>
+    <!-- display company details End -->
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
